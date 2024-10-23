@@ -82,7 +82,7 @@ test("ingests an audio recording", async ({ page }) => {
     await page.goto("/ingest");
     await page.getByRole("link", { name: "Record an audio note" }).click();
     await page.getByRole('button', { name: 'Start Recording' }).click({ force: true });
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(6000); // The audio is about 5 seconds long
     await page.getByRole('button', { name: 'Stop Recording' }).click({ force: true });
     await page.waitForTimeout(1000);
 
