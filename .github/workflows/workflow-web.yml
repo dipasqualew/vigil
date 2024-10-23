@@ -105,6 +105,14 @@ jobs:
         with:
           name: playwright-report
           path: ./.cache/e2e-web/test-results
+          include-hidden-files: true
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: ./.cache/e2e-web/html-report
           retention-days: 30
 
   # deploy-prod:

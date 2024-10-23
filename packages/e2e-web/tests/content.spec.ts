@@ -67,7 +67,8 @@ test("ingests a photo", async ({ page }) => {
     await page.getByRole('button', { name: 'Take Picture' }).click({ force: true });
 
     const contentUrlRegex = /\/usercontent\/([\w-]+)/;
-    await page.waitForURL(contentUrlRegex);
+    // GPT is slow at the moment
+    await page.waitForURL(contentUrlRegex, { timeout: 60 * 1000 });
 
     const match = contentUrlRegex.exec(page.url());
     const contentUuid = match && match[1];
