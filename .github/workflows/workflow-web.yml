@@ -75,8 +75,6 @@ jobs:
     needs: deploy-staging
     environment:
       name: staging
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -97,6 +95,9 @@ jobs:
         working-directory: packages/e2e-web
 
       - run: npx playwright test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WEBAPP_URL: ${{ needs.deploy-staging.outputs.VERCEL_DEPLOYMENT_URL }}
         working-directory: packages/e2e-web
 
       - uses: actions/upload-artifact@v4
@@ -105,8 +106,6 @@ jobs:
           name: playwright-report
           path: ./cache/e2e-web/html-report
           retention-days: 30
-
-
 
   # deploy-prod:
   #   runs-on: ubuntu-latest
