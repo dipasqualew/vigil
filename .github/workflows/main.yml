@@ -23,7 +23,7 @@ jobs:
     outputs:
       web: ${{ steps.filter.outputs.web }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Or: https://github.com/tj-actions/changed-files
       - id: filter

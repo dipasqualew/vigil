@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: '20.17'
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.PACKAGE_ROOT }}/node_modules
           key: web-${{ hashFiles(format('{0}/package-lock.json', env.PACKAGE_ROOT)) }}
@@ -83,7 +83,7 @@ jobs:
         with:
           node-version: '20.17'
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: packages/e2e-web/node_modules
           key: e2e-web-${{ hashFiles(format('{0}/package-lock.json', './packages/e2e-web')) }}
@@ -104,7 +104,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: ./cache/e2e-web/test-results
+          path: ./.cache/e2e-web/test-results
           retention-days: 30
 
   # deploy-prod:
