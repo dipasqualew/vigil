@@ -13,12 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-  deploy-staging:
+  deploy:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
     needs: test
     environment:
-      name: staging
+      name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
     env:
       VERCEL_ORG_ID: ${{ secrets.WEBSERVICE__VERCEL_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.WEBSERVICE__VERCEL_PROJECT_ID }}
@@ -50,31 +49,36 @@ jobs:
 
       - name: Pull Vercel Environment Information
         working-directory: ${{ env.PACKAGE_ROOT }}
-        run: npx vercel pull --yes --environment=preview --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
+        run: npx vercel pull --yes --environment=$TARGET_ENVIRONMENT --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
+        env:
+          TARGET_ENVIRONMENT: ${{ (github.ref == 'refs/heads/main') && 'production' || 'preview' }}
 
       - name: Build Project Artifacts
         working-directory: ${{ env.PACKAGE_ROOT }}
-        run: npx vercel build --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
+        run: npx vercel build $BUILD_FLAGS --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
+        env:
+          BUILD_FLAGS: ${{ (github.ref == 'refs/heads/main') && '--prod' || '' }}
 
       - name: Deploy Project Artifacts to Vercel
         working-directory: ${{ env.PACKAGE_ROOT }}
         id: deploy-preview
         run: |
-          npx vercel deploy --prebuilt --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }} > vercel-domain.txt
+          npx vercel deploy --prebuilt --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }} $DEPLOY_FLAGS > vercel-domain.txt
           echo "VERCEL_DEPLOYMENT_URL=$(cat vercel-domain.txt)" >> $GITHUB_OUTPUT
           echo "# Preview URL" >> $GITHUB_STEP_SUMMARY
           echo "$(cat vercel-domain.txt)" >> $GITHUB_STEP_SUMMARY
           echo "::notice title=Preview URL::$(cat vercel-domain.txt)"
+        env:
+          DEPLOY_FLAGS: ${{ (github.ref == 'refs/heads/main') && '--prod' || '' }}
 
     outputs:
       VERCEL_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.VERCEL_DEPLOYMENT_URL }}
 
-  e2e-tests-staging:
+  e2e-tests:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    needs: deploy-staging
+    needs: deploy
     environment:
-      name: staging
+      name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +101,7 @@ jobs:
       - run: npx playwright test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          WEBAPP_URL: ${{ needs.deploy-staging.outputs.VERCEL_DEPLOYMENT_URL }}
+          WEBAPP_URL: ${{ needs.deploy.outputs.VERCEL_DEPLOYMENT_URL }}
         working-directory: ./packages/e2e-web
 
       - uses: actions/upload-artifact@v4
@@ -114,36 +118,3 @@ jobs:
           name: staging__playwright__html_report
           path: ./.cache/e2e-web/html-report
           retention-days: 30
-
-  # deploy-prod:
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   if: github.ref == 'refs/heads/main'
-  #   environment:
-  #     name: prodeu
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - uses: oven-sh/setup-bun@v1
-  #       with:
-  #         bun-version: latest
-
-  #     - name: Install dependencies
-  #       working-directory: ${{ env.PACKAGE_ROOT }}
-  #       run: bun install
-
-  #     - name: Pull Vercel Environment Information
-  #       working-directory: ${{ env.PACKAGE_ROOT }}
-  #       run: bun x vercel pull --yes --environment=production --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
-
-  #     - name: Build Project Artifacts
-  #       working-directory: ${{ env.PACKAGE_ROOT }}
-  #       run: bun x vercel build --prod --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }}
-
-  #     - name: Deploy Project Artifacts to Vercel
-  #       working-directory: ${{ env.PACKAGE_ROOT }}
-  #       id: deploy-prod
-  #       run: |
-  #         bun x vercel deploy --prebuilt --token=${{ secrets.WEBSERVICE__VERCEL_TOKEN }} --prod > vercel-domain.txt
-  #         echo "VERCEL_DEPLOYMENT_URL=$(cat vercel-domain.txt)" >> $GITHUB_OUTPUT
