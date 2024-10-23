@@ -67,8 +67,7 @@ test("ingests a photo", async ({ page }) => {
     await page.getByRole('button', { name: 'Take Picture' }).click({ force: true });
 
     const contentUrlRegex = /\/usercontent\/([\w-]+)/;
-    // GPT is slow at the moment
-    await page.waitForURL(contentUrlRegex, { timeout: 60 * 1000 });
+    await page.waitForURL(contentUrlRegex);
 
     const match = contentUrlRegex.exec(page.url());
     const contentUuid = match && match[1];
@@ -83,7 +82,7 @@ test("ingests an audio recording", async ({ page }) => {
     await page.goto("/ingest");
     await page.getByRole("link", { name: "Record an audio note" }).click();
     await page.getByRole('button', { name: 'Start Recording' }).click({ force: true });
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(6000); // The audio is about 5 seconds long
     await page.getByRole('button', { name: 'Stop Recording' }).click({ force: true });
     await page.waitForTimeout(1000);
 

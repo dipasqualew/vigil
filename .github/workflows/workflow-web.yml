@@ -85,20 +85,20 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: packages/e2e-web/node_modules
+          path: ./packages/e2e-web/node_modules
           key: e2e-web-${{ hashFiles(format('{0}/package-lock.json', './packages/e2e-web')) }}
 
       - run: npm install
-        working-directory: packages/e2e-web
+        working-directory: ./packages/e2e-web
 
       - run: npx playwright install --with-deps
-        working-directory: packages/e2e-web
+        working-directory: ./packages/e2e-web
 
       - run: npx playwright test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WEBAPP_URL: ${{ needs.deploy-staging.outputs.VERCEL_DEPLOYMENT_URL }}
-        working-directory: packages/e2e-web
+        working-directory: ./packages/e2e-web
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
