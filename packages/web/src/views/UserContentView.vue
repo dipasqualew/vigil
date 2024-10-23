@@ -43,6 +43,12 @@ watch(() => contentUuid, async (newUuid) => {
 
 <template>
     <v-switch v-model="displayRecords" :label="displayRecords ? 'Showing Records' : 'Showing Sources'" />
+    <div class="add">
+        <router-link to="/ingest/text"><v-icon icon="mdi-text" /></router-link>
+        <router-link to="/ingest/photo"><v-icon icon="mdi-camera" /></router-link>
+        <router-link to="/ingest/audio"><v-icon icon="mdi-microphone" /></router-link>
+        <router-link to="/ingest/file"><v-icon icon="mdi-file" /></router-link>
+    </div>
     <div v-for="entity in entities" :key="entity.media.key">
         <div v-if="displayRecords">
             <div v-for="result in entity.results" :key="result.key">
@@ -53,17 +59,29 @@ watch(() => contentUuid, async (newUuid) => {
         </div>
         <div v-else>
             <MediaSummary :media="entity.media" :results="entity.results" />
-            <div class="add"><router-link to="/ingest">Click to add</router-link></div>
+            <div class="add">
+                <router-link to="/ingest/text"><v-icon icon="mdi-text" /></router-link>
+                <router-link to="/ingest/photo"><v-icon icon="mdi-camera" /></router-link>
+                <router-link to="/ingest/audio"><v-icon icon="mdi-microphone" /></router-link>
+                <router-link to="/ingest/file"><v-icon icon="mdi-file" /></router-link>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+a {
+    text-decoration: none;
+    color: inherit;
+}
 .add {
     text-align: center;
     color: transparent;
     transition: color 0.6s;
     cursor: pointer;
+}
+.add i {
+    margin: 0 0.2rem;
 }
 .add:hover {
     color: black;
