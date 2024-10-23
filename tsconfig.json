@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "~/web/*": [
+                "./packages/web/src/*"
+            ]
+        },
+        "sourceMap": true
+    },
+    "include": [
+        "./packages/**/*.ts",
+        "./packages/**/*.vue"
+    ]
+}

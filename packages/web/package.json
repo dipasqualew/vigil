@@ -1,0 +1,32 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.662.0",
+    "@sentry/browser": "^8.33.1",
+    "@sentry/vue": "^8.33.1",
+    "amazon-cognito-identity-js": "^6.3.12",
+    "aws-amplify": "^6.6.3",
+    "openai": "^4.67.0",
+    "vercel": "^37.9.0",
+    "vue": "^3.4.37",
+    "vue-router": "^4.4.5",
+    "vuetify": "^3.7.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@mdi/font": "^7.4.47",
+    "@types/node": "^22.7.9",
+    "@vitejs/plugin-vue": "^5.1.2",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1",
+    "vue-tsc": "^2.0.29"
+  }
+}
