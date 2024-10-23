@@ -44,6 +44,10 @@ importers:
         version: 2.1.2(@edge-runtime/vm@3.2.0)(@types/node@22.7.5)
 
   packages/e2e-web:
+    dependencies:
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
     devDependencies:
       '@playwright/test':
         specifier: ^1.48.1
