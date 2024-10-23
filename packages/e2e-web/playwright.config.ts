@@ -14,6 +14,14 @@ import * as utils from "./src/e2e-test-utils";
 
 dotenv.config({ path: path.resolve(utils.ROOT_FOLDER, '.env') });
 
+const baseURL = process.env.CI
+    ? process.env.WEBAPP_URL
+    : process.env.WEBAPP_URL || `http://localhost:${utils.WEB_PORT}`;
+
+if (!baseURL) {
+    throw new Error('Missing WEBAPP_URL environment variable');
+}
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -34,7 +42,7 @@ export default defineConfig({
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-        baseURL: `http://localhost:${utils.WEB_PORT}`,
+        baseURL,
 
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'on-first-retry',
@@ -97,7 +105,7 @@ export default defineConfig({
     outputDir: path.join(utils.CACHE_FOLDER, "test-results"),
 
     /* Run your local dev server before starting the tests */
-    webServer: {
+    webServer: process.env.CI ? undefined : {
         command: `just dev web --port ${utils.WEB_PORT}`,
         url: `http://localhost:${utils.WEB_PORT}`,
         reuseExistingServer: !process.env.CI,

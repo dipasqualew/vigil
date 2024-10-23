@@ -69,6 +69,45 @@ jobs:
     outputs:
       VERCEL_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.VERCEL_DEPLOYMENT_URL }}
 
+  e2e-tests-staging:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    needs: deploy-staging
+    environment:
+      name: staging
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17'
+
+      - uses: actions/cache@v3
+        with:
+          path: packages/e2e-web/node_modules
+          key: web-${{ hashFiles(format('{0}/package-lock.json', 'packages/e2e-web')) }}
+
+      - run: npm ci
+        working-directory: packages/e2e-web
+
+      - run: npx playwright install --with-deps
+        working-directory: packages/e2e-web
+
+      - run: npx playwright test
+        working-directory: packages/e2e-web
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: ./cache/e2e-web/html-report
+          retention-days: 30
+
+
+
   # deploy-prod:
   #   runs-on: ubuntu-latest
   #   needs: test
