@@ -39,6 +39,9 @@ export default defineConfig({
         baseURL,
         screenshot: process.env.CI ? "only-on-failure" : 'off',
         trace: 'retain-on-failure',
+        extraHTTPHeaders: {
+            'x-vercel-skip-toolbar': '1',
+        },
     },
 
     /* Configure projects for major browsers */
