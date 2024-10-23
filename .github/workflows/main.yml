@@ -35,7 +35,7 @@ jobs:
               - 'packages/web/**'
 
   web:
-    name: Web CI
+    name: Web
     needs: [setup]
     if: needs.setup.outputs.web == 'true' || inputs.force_web == 'true'
     uses: ./.github/workflows/workflow-web.yml
