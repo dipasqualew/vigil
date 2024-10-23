@@ -1,0 +1,42 @@
+name: Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_web:
+        description: Force execute the web job
+        type: string
+        default: "false"
+
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@v3
+
+      # Or: https://github.com/tj-actions/changed-files
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - '.github/workflows/workflow-web.yml'
+              - 'packages/web/**'
+
+  web:
+    name: Web CI
+    needs: [setup]
+    if: needs.setup.outputs.web == 'true' || inputs.force_web == 'true'
+    uses: ./.github/workflows/workflow-web.yml
+    secrets: inherit
