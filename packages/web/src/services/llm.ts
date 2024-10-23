@@ -7,6 +7,7 @@ import { Media, MediaCategories, MediaService } from "~/web/services/media";
 
 import { ActionTypes } from './actions';
 import { useUserSettings } from './user';
+import { memoFunction } from '../utils';
 
 
 export const DEFAULT_EMBEDDING_DIMENSIONS = 1536;
@@ -249,6 +250,21 @@ export class OpenAILLM extends LLM {
         });
 
         return response.text;
+    }
+}
+
+export class CachedOpenAILLM extends OpenAILLM {
+
+    query(system: string, content: string) {
+        return memoFunction(() => super.query(system, content), "CachedOpenAILLM.query", `${system}:${content}`);
+    }
+
+    describeImage(media: Media) {
+        return memoFunction(() => super.describeImage(media), "CachedOpenAILLM.describeImage", media.filename);
+    }
+
+    describeAudio(media: Media) {
+        return memoFunction(() => super.describeAudio(media), "CachedOpenAILLM.describeAudio", media.filename);
     }
 }
 

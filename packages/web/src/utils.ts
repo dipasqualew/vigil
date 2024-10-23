@@ -1,3 +1,18 @@
+const simpleHash = (str: string) => {
+    if (str.length === 0) {
+        return "0";
+    };
+
+    let hash = 0;
+
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+
+    return Math.abs(hash).toString();
+};
 
 export const getRelativeTime = (date: Date): string => {
     const now = new Date();
@@ -20,4 +35,26 @@ export const getRelativeTime = (date: Date): string => {
     } else {
         return rtf.format(diffInDays, 'day');
     }
+};
+
+export const memoFunction = async <T>(fn: () => T | Promise<T>, cacheName: string, cacheKey: string): Promise<T> => {
+    const key = simpleHash(`${cacheName}:${cacheKey}`);
+
+    try {
+        const existingValue = await localStorage.getItem(key);
+
+        if (existingValue) {
+            return JSON.parse(existingValue);
+        }
+    } catch {
+        // skip
+    }
+
+    console.log(`Cache miss for '${key}'`);
+
+    const result = await fn();
+
+    localStorage.setItem(key, JSON.stringify(result));
+
+    return result;
 };
