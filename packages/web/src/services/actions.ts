@@ -21,13 +21,14 @@ export abstract class Action<T extends zod.AnyZodObject> {
     abstract getModel(): T;
 
     async store(key: string, media: Media, json: zod.infer<T>): Promise<ActionResult> {
+        const now = Date.now();
         const item: ActionResult = {
             key,
             mediaKey: media.key,
-            // @ts-expect-error - this is fine
-            actionType: this.constructor.TYPE as string,
-            created: Date.now(),
+            actionType: (this.constructor as typeof Action).TYPE,
             value: json as Record<string, string>,
+            created: Date.now(),
+            datetime: now,
         };
 
         await this.mediaService.crud.put(Entities.ACTION_RESULT, key, item);
@@ -86,12 +87,15 @@ You will need to extract the information and create a todo for them.
     }
 
     async _perform(key: string, media: Media, json: TodoCreateJson): Promise<void> {
+        const now = Date.now();
         const item: Todo = {
             key,
             mediaKey: media.key,
-            created: Date.now(),
             description: json.todo,
             done: false,
+            due: null,
+            datetime: now,
+            created: now,
         };
 
         await this.mediaService.crud.put(Entities.TODO, key, item);

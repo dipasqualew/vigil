@@ -21,29 +21,33 @@ export enum Entities {
 
 export interface Media {
     key: string;
-    created: number;
     filename: string;
     category: MediaCategories,
     contentType: string;
     source: IngestSources;
     description: string;
     blob: Blob;
+    datetime: number;
+    created: number;
 }
 
 export interface ActionResult {
     key: string;
     mediaKey: string;
     actionType: ActionTypes;
-    created: number;
     value: Record<string, string>;
+    datetime: number;
+    created: number;
 }
 
 export interface Todo {
     key: string;
     mediaKey: string;
-    created: number;
     description: string;
     done: boolean;
+    due: number | null;
+    datetime: number;
+    created: number;
 }
 
 export type Schema = {
