@@ -4,11 +4,12 @@ import { onMounted, ref, watch } from "vue";
 import MediaSummary from "~/web/components/usercontent/MediaSummary.vue";
 import ResultContainer from "~/web/components/usercontent/ResultContainer.vue";
 import {
-  ActionResult,
-  Entities,
-  Media,
-  useMediaService,
+    ActionResult,
+    Entities,
+    Media,
+    useMediaService,
 } from "~/web/services/media";
+
 
 const { contentUuid } = defineProps<{ contentUuid?: string }>();
 
@@ -16,36 +17,36 @@ const displayRecords = ref(false);
 const entities = ref<{ media: Media; results: ActionResult[] }[]>([]);
 
 const loadContent = async (mediaKey?: string) => {
-  const mediaService = useMediaService();
-  const items = (
-    mediaKey
-      ? [await mediaService.crud.get(Entities.MEDIA, mediaKey)]
-      : await mediaService.crud.list(Entities.MEDIA)
-  )
-    .filter((item) => item !== undefined)
-    .sort((a, b) => {
-      return new Date(b.created).getTime() - new Date(a.created).getTime();
-    });
+    const mediaService = useMediaService();
+    const items = (
+        mediaKey
+            ? [await mediaService.crud.get(Entities.MEDIA, mediaKey)]
+            : await mediaService.crud.list(Entities.MEDIA)
+    )
+        .filter((item) => item !== undefined)
+        .sort((a, b) => {
+            return new Date(b.created).getTime() - new Date(a.created).getTime();
+        });
 
-  for (const item of items) {
-    const result = await mediaService.crud.list(Entities.ACTION_RESULT, {
-      mediaKey: item.key,
-    });
+    for (const item of items) {
+        const result = await mediaService.crud.list(Entities.ACTION_RESULT, {
+            mediaKey: item.key,
+        });
 
-    entities.value.push({ media: item, results: result });
-  }
+        entities.value.push({ media: item, results: result });
+    }
 };
 
 onMounted(async () => {
-  await loadContent(contentUuid);
+    await loadContent(contentUuid);
 });
 
 watch(
-  () => contentUuid,
-  async (newUuid) => {
-    entities.value = [];
-    await loadContent(newUuid);
-  }
+    () => contentUuid,
+    async (newUuid) => {
+        entities.value = [];
+        await loadContent(newUuid);
+    },
 );
 </script>
 

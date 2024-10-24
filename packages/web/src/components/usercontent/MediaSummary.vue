@@ -64,32 +64,33 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { IngestSources } from "~/web/types";
 import S3Renderer from "~/web/components/usercontent/S3Renderer.vue";
 import {
-  ActionResult,
-  Entities,
-  Media,
-  useMediaService,
+    ActionResult,
+    Entities,
+    Media,
+    useMediaService,
 } from "~/web/services/media";
+import { IngestSources } from "~/web/types";
 import { getRelativeTime } from "~/web/utils";
+
 
 const { media } = defineProps<{ media: Media; results: ActionResult[] }>();
 const router = useRouter();
 
 const description = computed(() => {
-  switch (media.source) {
-    case IngestSources.TXT_NOTE:
-      return "You wrote a note";
-    case IngestSources.FILE_UPLOAD:
-      return "You uploaded a file";
-    case IngestSources.PHOTO:
-      return "You took a photo";
-    case IngestSources.AUDIO_RECORDING:
-      return "You recorded an audio note";
-    default:
-      return "Unknown source";
-  }
+    switch (media.source) {
+        case IngestSources.TXT_NOTE:
+            return "You wrote a note";
+        case IngestSources.FILE_UPLOAD:
+            return "You uploaded a file";
+        case IngestSources.PHOTO:
+            return "You took a photo";
+        case IngestSources.AUDIO_RECORDING:
+            return "You recorded an audio note";
+        default:
+            return "Unknown source";
+    }
 });
 
 const url = computed(() => URL.createObjectURL(media.blob));
@@ -97,9 +98,9 @@ const url = computed(() => URL.createObjectURL(media.blob));
 const relativeTime = computed(() => getRelativeTime(new Date(media.created)));
 
 const deleteContent = async () => {
-  const mediaService = useMediaService();
-  await mediaService.crud.delete(Entities.MEDIA, media.key);
-  await router.push("/");
+    const mediaService = useMediaService();
+    await mediaService.crud.delete(Entities.MEDIA, media.key);
+    await router.push("/");
 };
 </script>
 
