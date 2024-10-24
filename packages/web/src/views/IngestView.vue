@@ -3,16 +3,15 @@ import * as Sentry from '@sentry/vue';
 import { v4 as uuid4 } from 'uuid';
 import { useRouter } from 'vue-router';
 
-import { IngestInput } from '~/web/types';
 import IngestAudio from '~/web/components/ingest/IngestAudio.vue';
 import IngestFile from "~/web/components/ingest/IngestFile.vue";
 import IngestPhoto from '~/web/components/ingest/IngestPhoto.vue';
 import IngestText from "~/web/components/ingest/IngestText.vue";
 import BasePage from "~/web/components/templates/BasePage.vue";
-import { Entities, Media, useMediaService } from '~/web/services/media';
-
 import { getAction } from '~/web/services/actions';
 import { useLLM } from '~/web/services/llm';
+import { Entities, Media, useMediaService } from '~/web/services/media';
+import { IngestInput } from '~/web/types';
 
 
 const { mode } = defineProps<{ mode?: string }>();
@@ -41,7 +40,7 @@ const onIngest = async (ingestInput: IngestInput) => {
     Sentry.startSpan({ name: "Ingestion Flow" }, async () => {
         const llm = useLLM();
         const key = uuid4();
-        const created = Date.now();
+        const now = Date.now();
         const mediaService = useMediaService();
 
         const item: Media = {
@@ -51,8 +50,9 @@ const onIngest = async (ingestInput: IngestInput) => {
             contentType: ingestInput.blob.type,
             filename: ingestInput.metadata.filename,
             source: ingestInput.metadata.ingestSource,
-            created,
             description: "",
+            datetime: now,
+            created: now,
         };
 
         item.description = await llm.interpretation(item);
