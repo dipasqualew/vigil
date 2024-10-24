@@ -99,10 +99,23 @@ jobs:
           node-version: '20.17'
           cache: 'pnpm'
 
+      - run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package.json').devDependencies['@playwright/test'])")" >> $GITHUB_ENV
+        working-directory: ./packages/e2e-web
+
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
       - run: pnpm install --filter e2e-web
 
       - run: npx playwright install --with-deps
-        working-directory: ./packages/e2e-web
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - run: npx playwright test
         env:
