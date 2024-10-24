@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "npm run lint:eslint && npm run lint:tsc",
+    "lint:eslint": "eslint .",
+    "lint:tsc": "tsc --noEmit",
     "test": "playwright test"
   },
   "keywords": [],
@@ -14,6 +17,7 @@
     "@types/node": "^22.7.5"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "typescript": "^5.5.3"
   }
 }

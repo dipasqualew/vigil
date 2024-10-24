@@ -13,9 +13,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17'
+          cache: 'pnpm'
+
+      - run: pnpm install --filter web
+
+      - run: pnpm run lint:eslint
+        working-directory: packages/web
+
+      - run: pnpm run lint:tsc
+        working-directory: packages/web
+
   deploy:
     runs-on: ubuntu-latest
-    needs: test
     environment:
       name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
     env:
@@ -27,25 +43,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20.17'
+          cache: 'pnpm'
 
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.PACKAGE_ROOT }}/node_modules
-          key: web-${{ hashFiles(format('{0}/package-lock.json', env.PACKAGE_ROOT)) }}
-
-      - run: npm install
-        working-directory: ${{ env.PACKAGE_ROOT }}
-
-      # - name: Lint the codebase
-      #   working-directory: ${{ env.PACKAGE_ROOT }}
-      #   run: bun run eslint
-
-      # - name: Run tests
-      #   working-directory: ${{ env.PACKAGE_ROOT }}
-      #   run: bun x vitest
+      - run: pnpm install --filter web
 
       - name: Pull Vercel Environment Information
         working-directory: ${{ env.PACKAGE_ROOT }}
@@ -76,29 +83,43 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: [test, deploy]
     environment:
       name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
 
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20.17'
+          cache: 'pnpm'
+
+      - run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package.json').devDependencies['@playwright/test'])")" >> $GITHUB_ENV
+        working-directory: ./packages/e2e-web
 
       - uses: actions/cache@v4
+        id: playwright-cache
         with:
-          path: ./packages/e2e-web/node_modules
-          key: e2e-web-${{ hashFiles(format('{0}/package-lock.json', './packages/e2e-web')) }}
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
 
-      - run: npm install
+      - run: pnpm install --filter e2e-web
+
+      - run: pnpm exec playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ./packages/e2e-web
 
-      - run: npx playwright install --with-deps
+      - run: pnpm exec playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ./packages/e2e-web
 
-      - run: npx playwright test
+      - run: pnpm exec playwright test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WEBAPP_URL: ${{ needs.deploy.outputs.VERCEL_DEPLOYMENT_URL }}
