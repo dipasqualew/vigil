@@ -111,13 +111,15 @@ jobs:
 
       - run: pnpm install --filter e2e-web
 
-      - run: npx playwright install --with-deps
+      - run: pnpm exec playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ./packages/e2e-web
 
-      - run: npx playwright install-deps
+      - run: pnpm exec playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ./packages/e2e-web
 
-      - run: npx playwright test
+      - run: pnpm exec playwright test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WEBAPP_URL: ${{ needs.deploy.outputs.VERCEL_DEPLOYMENT_URL }}
