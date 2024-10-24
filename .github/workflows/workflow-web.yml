@@ -13,9 +13,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17'
+          cache: 'pnpm'
+
+      - uses: pnpm/action-setup@v2.3.0
+        with:
+          version: 9
+          run_install: true
+
+      - run: pnpm install --filter web
+
+      - run: pnpm run lint:eslint
+        working-directory: packages/web
+
+      - run: pnpm run lint:tsc
+        working-directory: packages/web
+
   deploy:
     runs-on: ubuntu-latest
-    needs: test
     environment:
       name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
     env:
@@ -30,22 +47,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20.17'
+          cache: 'pnpm'
 
-      - uses: actions/cache@v4
+      - uses: pnpm/action-setup@v2.3.0
         with:
-          path: ${{ env.PACKAGE_ROOT }}/node_modules
-          key: web-${{ hashFiles(format('{0}/package-lock.json', env.PACKAGE_ROOT)) }}
+          version: 9
+          run_install: true
 
-      - run: npm install
-        working-directory: ${{ env.PACKAGE_ROOT }}
-
-      # - name: Lint the codebase
-      #   working-directory: ${{ env.PACKAGE_ROOT }}
-      #   run: bun run eslint
-
-      # - name: Run tests
-      #   working-directory: ${{ env.PACKAGE_ROOT }}
-      #   run: bun x vitest
+      - run: pnpm install --filter web
 
       - name: Pull Vercel Environment Information
         working-directory: ${{ env.PACKAGE_ROOT }}
@@ -76,7 +85,7 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: [test, deploy]
     environment:
       name: ${{ (github.ref == 'refs/heads/main') && 'prod' || 'staging' }}
 
@@ -86,14 +95,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20.17'
+          cache: 'pnpm'
 
-      - uses: actions/cache@v4
+      - uses: pnpm/action-setup@v2.3.0
         with:
-          path: ./packages/e2e-web/node_modules
-          key: e2e-web-${{ hashFiles(format('{0}/package-lock.json', './packages/e2e-web')) }}
+          version: 9
+          run_install: true
 
-      - run: npm install
-        working-directory: ./packages/e2e-web
+      - run: pnpm install --filter e2e-web
 
       - run: npx playwright install --with-deps
         working-directory: ./packages/e2e-web

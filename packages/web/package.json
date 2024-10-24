@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "lint": "npm run lint:eslint && npm run lint:tsc",
+    "lint:eslint": "eslint .",
+    "lint:tsc": "vue-tsc --noEmit",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
